@@ -25,13 +25,14 @@ public class PoohServer {
                     try (OutputStream out = socket.getOutputStream();
                          InputStream input = socket.getInputStream()) {
                         byte[] buff = new byte[1_000_000];
-                        int total = input.read(buff);
-                        String content = new String(Arrays.copyOfRange(buff, 0, total), StandardCharsets.UTF_8);
-                        Req req = Req.of(content);
-                        Service resp = modes.get(req.getParam());
-//                        String ls = System.lineSeparator();
-//                        out.write(("HTTP/1.1 " + resp.status() + ls).getBytes());
-//                        out.write((resp.text().concat(ls)).getBytes());
+                        var total = input.read(buff);
+                        var content = new String(Arrays.copyOfRange(buff, 0, total), StandardCharsets.UTF_8);
+                        var req = Req.of(content);
+                        Service service = (Service) modes.get(req.getPoohMode());
+                        Resp resp = service.process(req);
+                        String ls = System.lineSeparator();
+                        out.write(("HTTP/1.1 " + resp.status() + ls).getBytes());
+                        out.write((resp.text().concat(ls)).getBytes());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
